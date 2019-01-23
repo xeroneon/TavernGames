@@ -219,10 +219,10 @@ class Nav extends React.Component {
             /> : <div></div>}
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.handleSignUp} color="primary">
+            <Button variant="outlined" onClick={this.handleSignUp} color="primary">
               {this.state.signup ? "Login" : "Sign Up"}
             </Button>
-            <Button onClick={this.handleSubmit} color="primary">
+            <Button variant="outlined" onClick={this.handleSubmit} color="primary">
               Submit
             </Button>
           </DialogActions>
