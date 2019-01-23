@@ -16,6 +16,12 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import BuildIcon from '@material-ui/icons/Build';
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 
 const styles = {
@@ -44,11 +50,25 @@ class Nav extends React.Component {
   }
 
   state = {
-    drawer: false
+    drawer: false,
+    open: false,
+    signup: false,
+    email: '',
+    username: '',
+    password: '',
+    firstName: '',
+    lastName: ''
   }
 
+  handleInputChange = event => {
+    const { name, value } = event.target;
+    this.setState({
+      [name]: value
+    });
+  };
+
   toggleDrawer = () => {
-    if( this.state.drawer === false) {
+    if (this.state.drawer === false) {
       this.setState({
         drawer: true
       });
@@ -60,6 +80,36 @@ class Nav extends React.Component {
     }
   }
 
+  handleClickOpen = () => {
+    this.setState({ open: true });
+  };
+
+  handleClose = () => {
+    this.setState({ open: false });
+  };
+
+  handleSignUp = () => {
+    if(this.state.signup === true) {
+      this.setState({
+        signup: false
+      })
+    } else {
+      this.setState({
+        signup: true
+      })
+    }
+  }
+
+  handleLogin = () => {
+    if(this.state.signup === true) {
+      this.setState({
+        signup: false
+      })
+    } else {
+      console.log("login");
+    }
+  }
+
   render() {
     const { classes } = this.props;
 
@@ -67,39 +117,116 @@ class Nav extends React.Component {
       <div className={classes.list}>
         <List>
 
-            <ListItem button key="deckbuilder">
-              <ListItemIcon><BuildIcon /></ListItemIcon>
-              <ListItemText primary="DeckBuilder" />
-            </ListItem>
+          <ListItem button key="deckbuilder">
+            <ListItemIcon><BuildIcon /></ListItemIcon>
+            <ListItemText primary="DeckBuilder" />
+          </ListItem>
 
         </List>
       </div>
     );
-    
+
     return (
       <div className={classes.root}>
         <AppBar position="static" className={classes.AppBar}>
           <Toolbar>
             <IconButton className={classes.menuButton} color="inherit" aria-label="Menu" onClick={this.toggleDrawer}>
-              <MenuIcon/>
+              <MenuIcon />
             </IconButton>
             <Typography variant="h6" color="inherit" className={classes.grow}>
               Tavern Games
             </Typography>
-            <Button color="inherit">Login</Button>
+            <Button color="inherit" onClick={this.handleClickOpen}>Login</Button>
           </Toolbar>
         </AppBar>
         {/* <SideNav open={this.state.drawer} /> */}
         <Drawer open={this.state.drawer} onClose={this.toggleDrawer}>
-                  <div
-                    tabIndex={0}
-                    role="button"
-                    onClick={this.toggleDrawer}
-                    onKeyDown={this.toggleDrawer}
-                  >
-                    {sideList}
-                  </div>
-                </Drawer>
+          <div
+            tabIndex={0}
+            role="button"
+            onClick={this.toggleDrawer}
+            onKeyDown={this.toggleDrawer}
+          >
+            {sideList}
+          </div>
+        </Drawer>
+
+        <Dialog
+          open={this.state.open}
+          onClose={this.handleClose}
+          aria-labelledby="form-dialog-title"
+        >
+          <DialogTitle id="form-dialog-title">{ this.state.signup ? "Sign Up" : "Login"}</DialogTitle>
+          <DialogContent>
+            {this.state.signup ? <TextField
+              autoFocus
+              margin="dense"
+              id="username"
+              label="Username"
+              type="username"
+              name="username"
+              fullWidth
+              variant="outlined"
+              onChange={this.handleInputChange}
+              value={this.state.username}
+            /> : <div></div>}
+            <TextField
+              autoFocus
+              margin="dense"
+              id="email"
+              label={this.state.signup ? "Email Address" : "Username / Email Address"}
+              type="email"
+              name="email"
+              fullWidth
+              variant="outlined"
+              onChange={this.handleInputChange}
+              value={this.state.email}
+            />
+            <TextField
+              margin="dense"
+              id="password"
+              label="Password"
+              type="password"
+              name="password"
+              fullWidth
+              variant="outlined"
+              onChange={this.handleInputChange}
+              value={this.state.password}
+            />
+
+            {this.state.signup ? <TextField
+              margin="dense"
+              id="firstName"
+              label="First Name"
+              type="firstName"
+              name="firstName"
+              fullWidth
+              variant="outlined"
+              onChange={this.handleInputChange}
+              value={this.state.firstName}
+            /> : <div></div>}
+
+            {this.state.signup ? <TextField
+              margin="dense"
+              id="lastName"
+              label="Last Name"
+              type="lastName"
+              name="lastName"
+              fullWidth
+              variant="outlined"
+              onChange={this.handleInputChange}
+              value={this.state.lastName}
+            /> : <div></div>}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleSignUp} color="primary">
+              {this.state.signup ? "Login" : "Sign Up"}
+            </Button>
+            <Button onClick={this.handleSubmit} color="primary">
+              Submit
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     );
   }
