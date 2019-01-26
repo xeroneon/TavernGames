@@ -113,6 +113,12 @@ module.exports = (app) => {
             {email: email},
             {username: username}
         ]}).exec(function(err, user){
+            if(err) {
+                return res.send({
+                    success: false,
+                    message: "Something went wrong logging in, Try again"
+                })
+            }
             if (user) {
                 //continue passport video
                 req.login(user, function(err) {
@@ -122,7 +128,12 @@ module.exports = (app) => {
                     })
                 })
             } //user already exists with email AND/OR username.
-            else {} //no users with that email NOR username exist.
+            else {
+                return res.send({
+                    success: false,
+                    message: "No user found"
+                })
+            } //no users with that email NOR username exist.
         });
 
 

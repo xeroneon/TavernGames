@@ -114,7 +114,8 @@ class Nav extends React.Component {
     this.setState({ isSnackbarOpen: false });
   };
 
-  handleSubmit = () => {
+  handleSubmit = (event) => {
+    event.preventDefault();
     if(this.state.signup === true) {
 
       const newUser = {
@@ -158,7 +159,10 @@ class Nav extends React.Component {
             snackbarMessage: res.data.message
           })
         } else {
-
+          this.setState({
+            isSnackbarOpen: true,
+            snackbarMessage: res.data.message
+          })
         }
       })
       .catch(err => console.log(err));
@@ -210,9 +214,11 @@ class Nav extends React.Component {
         <Dialog
           open={this.state.open}
           onClose={this.handleClose}
+          scroll="body"
           aria-labelledby="form-dialog-title"
         >
           <DialogTitle id="form-dialog-title">{ this.state.signup ? "Sign Up" : "Login"}</DialogTitle>
+            <form>
           <DialogContent>
             {this.state.signup ? <TextField
               autoFocus
@@ -278,10 +284,11 @@ class Nav extends React.Component {
             <Button variant="outlined" onClick={this.handleSignUpToggle} color="primary">
               {this.state.signup ? "Login" : "Sign Up"}
             </Button>
-            <Button variant="outlined" onClick={this.handleSubmit} color="primary">
+            <Button variant="outlined" onClick={this.handleSubmit} color="primary" type="submit">
               Submit
             </Button>
           </DialogActions>
+          </form>
         </Dialog>
         <Snackbar
           anchorOrigin={{
