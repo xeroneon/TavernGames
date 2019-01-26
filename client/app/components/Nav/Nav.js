@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import SideNav from "../SideNav/SideNav"
@@ -22,6 +23,8 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Snackbar from '@material-ui/core/Snackbar';
+import CloseIcon from '@material-ui/icons/Close';
 
 
 const styles = {
@@ -50,8 +53,11 @@ class Nav extends React.Component {
   }
 
   state = {
+    isLoggedin: false,
     drawer: false,
     open: false,
+    isSnackbarOpen: false,
+    snackbarMessage: '',
     signup: false,
     email: '',
     username: '',
@@ -88,7 +94,7 @@ class Nav extends React.Component {
     this.setState({ open: false });
   };
 
-  handleSignUp = () => {
+  handleSignUpToggle = () => {
     if(this.state.signup === true) {
       this.setState({
         signup: false
@@ -100,13 +106,63 @@ class Nav extends React.Component {
     }
   }
 
-  handleLogin = () => {
+  handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    this.setState({ isSnackbarOpen: false });
+  };
+
+  handleSubmit = () => {
     if(this.state.signup === true) {
-      this.setState({
-        signup: false
-      })
+
+      const newUser = {
+        email: this.state.email,
+        username: this.state.username,
+        password: this.state.password,
+        firstName: this.state.firstName,
+        lastName: this.state.lastName
+      }
+      axios.post("/api/users/signup", newUser)
+        .then(res => {
+          console.log("signed up")
+          if (res.data.success) {
+            this.setState({
+              isLoggedin: true,
+              open: false,
+              isSnackbarOpen: true,
+              snackbarMessage: res.data.message
+            })
+          } else {
+
+          }
+        })
+        .catch(err => console.log(err));
     } else {
       console.log("login");
+
+      const returningUser = {
+        email: this.state.email,
+        username: this.state.username,
+        password: this.state.password,
+      }
+      axios.post("/api/users/login", returningUser)
+      .then(res => {
+        console.log("logged in")
+        if (res.data.success) {
+          this.setState({
+            isLoggedin: true,
+            open: false,
+            isSnackbarOpen: true,
+            snackbarMessage: res.data.message
+          })
+        } else {
+
+        }
+      })
+      .catch(err => console.log(err));
+
     }
   }
 
@@ -219,7 +275,7 @@ class Nav extends React.Component {
             /> : <div></div>}
           </DialogContent>
           <DialogActions>
-            <Button variant="outlined" onClick={this.handleSignUp} color="primary">
+            <Button variant="outlined" onClick={this.handleSignUpToggle} color="primary">
               {this.state.signup ? "Login" : "Sign Up"}
             </Button>
             <Button variant="outlined" onClick={this.handleSubmit} color="primary">
@@ -227,6 +283,30 @@ class Nav extends React.Component {
             </Button>
           </DialogActions>
         </Dialog>
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          open={this.state.isSnackbarOpen}
+          autoHideDuration={6000}
+          onClose={this.handleSnackbarClose}
+          ContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">{this.state.snackbarMessage}</span>}
+          action={[
+            <IconButton
+              key="close"
+              aria-label="Close"
+              color="primary"
+              className={classes.close}
+              onClick={this.handleSnackbarClose}
+            >
+              <CloseIcon />
+            </IconButton>,
+          ]}
+        />
       </div>
     );
   }

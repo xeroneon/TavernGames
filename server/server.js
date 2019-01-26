@@ -17,6 +17,7 @@ const port  = process.env.PORT || 8080;
 //Authentication
 const session = require("express-session");
 const passport = require("passport");
+const MongoStore = require('connect-mongo')(session);
 
 
 
@@ -24,10 +25,12 @@ const passport = require("passport");
 // ================================================================================================
 
 // Set up Mongoose
-mongoose.connect(isDev ? config.db_dev : config.db);
+mongoose.connect(isDev ? config.db_dev : config.db, { useNewUrlParser: true } );
 mongoose.Promise = global.Promise;
+var db = mongoose.connection;
 
 const app = express();
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -35,7 +38,8 @@ const sess = {
   secret: 'keyboard cat',
   resave: false,
   saveUninitialized: false,
-  cookie: {}
+  cookie: {},
+  store: new MongoStore({ mongooseConnection: mongoose.connection })
 }
  
 if (app.get('env') === 'production') {

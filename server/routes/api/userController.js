@@ -1,4 +1,5 @@
 var User = require("../../models/User");
+const passport = require("passport")
 
 module.exports = (app) => {
 
@@ -90,9 +91,11 @@ module.exports = (app) => {
                     message: "failed to save user"
                 })
             } else {
-                return res.send({
-                    success: true,
-                    message: "user signed up"
+                req.login(user, function(err) {
+                    return res.send({
+                        success: true,
+                        message: "User Signed Up"
+                    })
                 })
             }
         })
@@ -112,10 +115,26 @@ module.exports = (app) => {
         ]}).exec(function(err, user){
             if (user) {
                 //continue passport video
+                req.login(user, function(err) {
+                    return res.send({
+                        success: true,
+                        message: "Successful Login"
+                    })
+                })
             } //user already exists with email AND/OR username.
             else {} //no users with that email NOR username exist.
         });
 
 
     })
+
+    passport.serializeUser(function(user, done) {
+        done(null, user.id);
+      });
+       
+      passport.deserializeUser(function(id, done) {
+        User.findById(id, function (err, user) {
+          done(err, user);
+        });
+      });
 }
