@@ -1,5 +1,6 @@
 var User = require("../../models/User");
 const passport = require("passport")
+const LocalStrategy = require("passport-local")
 
 module.exports = (app) => {
 
@@ -124,7 +125,8 @@ module.exports = (app) => {
                 req.login(user, function(err) {
                     return res.send({
                         success: true,
-                        message: "Successful Login"
+                        message: "Successful Login",
+                        user: req.user
                     })
                 })
             } //user already exists with email AND/OR username.
@@ -138,6 +140,43 @@ module.exports = (app) => {
 
 
     })
+
+    app.get("/api/users/authenticate", (req,res, next) => {
+        console.log(req.user)
+
+        if (req.user) {
+            return res.send({
+                authenticated: true,
+                user: req.user
+            })
+        } else {
+            return res.send({
+                authenticated: false
+            })
+        }
+    })
+
+    app.get("/api/users/logout", (req, res, next) => {
+        req.logout()
+
+        res.send({
+            loggedOut: true
+        })
+    })
+
+    passport.use(new LocalStrategy(
+        function(email, username, password, done) {
+          User.findOne({$or: [
+            {email: email},
+            {username: username}
+        ]}, function (err, user) {
+            if (err) { return done(err); }
+            if (!user) { return done(null, false); }
+            if (!user.validPassword(password)) { return done(null, false); }
+            return done(null, user);
+          });
+        }
+      ));
 
     passport.serializeUser(function(user, done) {
         done(null, user.id);

@@ -23,8 +23,15 @@ const theme = createMuiTheme({
       main: '#4caf50',
       contrastText: '#fff'
     },
-    type: 'dark'
-  },
+    type: 'dark',
+  }
+  // overrides: {
+  //   MuiSnackbar: { // Name of the component ⚛️ / style sheet
+  //     bodyStyle: { // Name of the rule
+  //       background: 'black',
+  //       color: 'black' // Some CSS
+  //     }
+  // },
 });
 
 render((

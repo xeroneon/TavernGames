@@ -25,6 +25,9 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Snackbar from '@material-ui/core/Snackbar';
 import CloseIcon from '@material-ui/icons/Close';
+import Avatar from '@material-ui/core/Avatar';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 
 
 const styles = {
@@ -54,16 +57,36 @@ class Nav extends React.Component {
 
   state = {
     isLoggedin: false,
+    userImage: '',
     drawer: false,
     open: false,
     isSnackbarOpen: false,
     snackbarMessage: '',
+    anchorEl: null,
     signup: false,
     email: '',
     username: '',
     password: '',
     firstName: '',
     lastName: ''
+  }
+
+  componentDidMount = () => {
+    axios.get("/api/users/authenticate")
+      .then(res => {
+        console.log(res)
+
+        if (res.data.authenticated) {
+          this.setState({
+            isLoggedin: true,
+            userImage: res.data.user.photo
+          })
+        } else {
+          this.setState({
+            isLoggedin: false
+          })
+        }
+      })
   }
 
   handleInputChange = event => {
@@ -95,7 +118,7 @@ class Nav extends React.Component {
   };
 
   handleSignUpToggle = () => {
-    if(this.state.signup === true) {
+    if (this.state.signup === true) {
       this.setState({
         signup: false
       })
@@ -114,9 +137,17 @@ class Nav extends React.Component {
     this.setState({ isSnackbarOpen: false });
   };
 
+  handleUserMenuClick = event => {
+    this.setState({ anchorEl: event.currentTarget });
+  };
+
+  handleUserMenuClose = () => {
+    this.setState({ anchorEl: null });
+  };
+
   handleSubmit = (event) => {
     event.preventDefault();
-    if(this.state.signup === true) {
+    if (this.state.signup === true) {
 
       const newUser = {
         email: this.state.email,
@@ -133,7 +164,12 @@ class Nav extends React.Component {
               isLoggedin: true,
               open: false,
               isSnackbarOpen: true,
-              snackbarMessage: res.data.message
+              snackbarMessage: res.data.message,
+              email: '',
+              username: '',
+              password: '',
+              firstName: '',
+              lastName: ''
             })
           } else {
 
@@ -149,25 +185,45 @@ class Nav extends React.Component {
         password: this.state.password,
       }
       axios.post("/api/users/login", returningUser)
-      .then(res => {
-        console.log("logged in")
-        if (res.data.success) {
-          this.setState({
-            isLoggedin: true,
-            open: false,
-            isSnackbarOpen: true,
-            snackbarMessage: res.data.message
-          })
-        } else {
-          this.setState({
-            isSnackbarOpen: true,
-            snackbarMessage: res.data.message
-          })
-        }
-      })
-      .catch(err => console.log(err));
+        .then(res => {
+          console.log("logged in")
+          if (res.data.success) {
+            this.setState({
+              isLoggedin: true,
+              userImage: res.data.user.photo,
+              open: false,
+              isSnackbarOpen: true,
+              snackbarMessage: res.data.message,
+              email: '',
+              username: '',
+              password: '',
+              firstName: '',
+              lastName: ''
+            })
+          } else {
+            this.setState({
+              isSnackbarOpen: true,
+              snackbarMessage: res.data.message
+            })
+          }
+        })
+        .catch(err => console.log(err));
 
     }
+  }
+
+  handleLogout = () => {
+    axios.get("/api/users/logout")
+      .then(res => {
+        if(res.data.loggedOut) {
+          this.setState({
+            isLoggedin: false,
+            isSnackbarOpen: true,
+            snackbarMessage: "Successful Logout"
+          })
+          this.handleUserMenuClose();
+        }
+      })
   }
 
   render() {
@@ -187,6 +243,7 @@ class Nav extends React.Component {
     );
 
     return (
+    
       <div className={classes.root}>
         <AppBar position="static" className={classes.AppBar}>
           <Toolbar>
@@ -196,7 +253,19 @@ class Nav extends React.Component {
             <Typography variant="h6" color="inherit" className={classes.grow}>
               Tavern Games
             </Typography>
-            <Button color="inherit" onClick={this.handleClickOpen}>Login</Button>
+            {this.state.isLoggedin ? <Avatar aria-owns={this.state.anchorEl ? 'simple-menu' : undefined}
+          aria-haspopup="true" onClick={this.handleUserMenuClick} alt="Remy Sharp" src={this.state.userImage} className={classes.bigAvatar} /> : <Button color="inherit" onClick={this.handleClickOpen}>Login</Button>}
+            <Menu
+              id="simple-menu"
+              anchorEl={this.state.anchorEl}
+              open={Boolean(this.state.anchorEl)}
+              onClose={this.handleUserMenuClose}
+            >
+              <MenuItem onClick={this.handleUserMenuClose}>Profile</MenuItem>
+              <MenuItem onClick={this.handleUserMenuClose}>My account</MenuItem>
+              <MenuItem onClick={this.handleLogout}>Logout</MenuItem>
+            </Menu>
+            {/* <Button color="inherit" onClick={this.handleClickOpen}>Login</Button> */}
           </Toolbar>
         </AppBar>
         {/* <SideNav open={this.state.drawer} /> */}
@@ -217,77 +286,77 @@ class Nav extends React.Component {
           scroll="body"
           aria-labelledby="form-dialog-title"
         >
-          <DialogTitle id="form-dialog-title">{ this.state.signup ? "Sign Up" : "Login"}</DialogTitle>
-            <form>
-          <DialogContent>
-            {this.state.signup ? <TextField
-              autoFocus
-              margin="dense"
-              id="username"
-              label="Username"
-              type="username"
-              name="username"
-              fullWidth
-              variant="outlined"
-              onChange={this.handleInputChange}
-              value={this.state.username}
-            /> : <div></div>}
-            <TextField
-              autoFocus
-              margin="dense"
-              id="email"
-              label={this.state.signup ? "Email Address" : "Username / Email Address"}
-              type="email"
-              name="email"
-              fullWidth
-              variant="outlined"
-              onChange={this.handleInputChange}
-              value={this.state.email}
-            />
-            <TextField
-              margin="dense"
-              id="password"
-              label="Password"
-              type="password"
-              name="password"
-              fullWidth
-              variant="outlined"
-              onChange={this.handleInputChange}
-              value={this.state.password}
-            />
+          <DialogTitle id="form-dialog-title">{this.state.signup ? "Sign Up" : "Login"}</DialogTitle>
+          <form>
+            <DialogContent>
+              {this.state.signup ? <TextField
+                autoFocus
+                margin="dense"
+                id="username"
+                label="Username"
+                type="username"
+                name="username"
+                fullWidth
+                variant="outlined"
+                onChange={this.handleInputChange}
+                value={this.state.username}
+              /> : <div></div>}
+              <TextField
+                autoFocus
+                margin="dense"
+                id="email"
+                label={this.state.signup ? "Email Address" : "Username / Email Address"}
+                type="email"
+                name="email"
+                fullWidth
+                variant="outlined"
+                onChange={this.handleInputChange}
+                value={this.state.email}
+              />
+              <TextField
+                margin="dense"
+                id="password"
+                label="Password"
+                type="password"
+                name="password"
+                fullWidth
+                variant="outlined"
+                onChange={this.handleInputChange}
+                value={this.state.password}
+              />
 
-            {this.state.signup ? <TextField
-              margin="dense"
-              id="firstName"
-              label="First Name"
-              type="firstName"
-              name="firstName"
-              fullWidth
-              variant="outlined"
-              onChange={this.handleInputChange}
-              value={this.state.firstName}
-            /> : <div></div>}
+              {this.state.signup ? <TextField
+                margin="dense"
+                id="firstName"
+                label="First Name"
+                type="firstName"
+                name="firstName"
+                fullWidth
+                variant="outlined"
+                onChange={this.handleInputChange}
+                value={this.state.firstName}
+              /> : <div></div>}
 
-            {this.state.signup ? <TextField
-              margin="dense"
-              id="lastName"
-              label="Last Name"
-              type="lastName"
-              name="lastName"
-              fullWidth
-              variant="outlined"
-              onChange={this.handleInputChange}
-              value={this.state.lastName}
-            /> : <div></div>}
-          </DialogContent>
-          <DialogActions>
-            <Button variant="outlined" onClick={this.handleSignUpToggle} color="primary">
-              {this.state.signup ? "Login" : "Sign Up"}
+              {this.state.signup ? <TextField
+                margin="dense"
+                id="lastName"
+                label="Last Name"
+                type="lastName"
+                name="lastName"
+                fullWidth
+                variant="outlined"
+                onChange={this.handleInputChange}
+                value={this.state.lastName}
+              /> : <div></div>}
+            </DialogContent>
+            <DialogActions>
+              <Button variant="outlined" onClick={this.handleSignUpToggle} color="primary">
+                {this.state.signup ? "Login" : "Sign Up"}
+              </Button>
+              <Button variant="outlined" onClick={this.handleSubmit} color="primary" type="submit">
+                Submit
             </Button>
-            <Button variant="outlined" onClick={this.handleSubmit} color="primary" type="submit">
-              Submit
-            </Button>
-          </DialogActions>
+            </DialogActions>
           </form>
         </Dialog>
         <Snackbar
