@@ -254,7 +254,7 @@ class Nav extends React.Component {
               Tavern Games
             </Typography>
             {this.state.isLoggedin ? <Avatar aria-owns={this.state.anchorEl ? 'simple-menu' : undefined}
-          aria-haspopup="true" onClick={this.handleUserMenuClick} alt="Remy Sharp" src={this.state.userImage} className={classes.bigAvatar} /> : <Button color="inherit" onClick={this.handleClickOpen}>Login</Button>}
+          aria-haspopup="true" onClick={this.handleUserMenuClick} alt="Remy Sharp" src={this.state.userImage} className={classes.bigAvatar} /> : <Button color="inherit" onClick={this.handleClickOpen}>Login / Sign Up</Button>}
             <Menu
               id="simple-menu"
               anchorEl={this.state.anchorEl}
