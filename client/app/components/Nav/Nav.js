@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from "react-router-dom";
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -16,7 +17,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
-import BuildIcon from '@material-ui/icons/Build';
+import BuildOutlinedIcon from '@material-ui/icons/BuildOutlined';
+import HomeOutlinedIcon from '@material-ui/icons/HomeOutlined';
+import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -57,6 +60,7 @@ class Nav extends React.Component {
 
   state = {
     isLoggedin: false,
+    isAdmin: false,
     userImage: '',
     drawer: false,
     open: false,
@@ -75,6 +79,11 @@ class Nav extends React.Component {
     axios.get("/api/users/authenticate")
       .then(res => {
         console.log(res)
+        if(res.data.user.role > 1) {
+          this.setState({
+            isAdmin: true
+          })
+        }
 
         if (res.data.authenticated) {
           this.setState({
@@ -215,7 +224,7 @@ class Nav extends React.Component {
   handleLogout = () => {
     axios.get("/api/users/logout")
       .then(res => {
-        if(res.data.loggedOut) {
+        if (res.data.loggedOut) {
           this.setState({
             isLoggedin: false,
             isSnackbarOpen: true,
@@ -232,18 +241,35 @@ class Nav extends React.Component {
     const sideList = (
       <div className={classes.list}>
         <List>
+          <Link to="/">
+            <ListItem button key="home">
+              <ListItemIcon><HomeOutlinedIcon /></ListItemIcon>
+              <ListItemText primary="Home" />
+            </ListItem>
+          </Link>
 
-          <ListItem button key="deckbuilder">
-            <ListItemIcon><BuildIcon /></ListItemIcon>
-            <ListItemText primary="DeckBuilder" />
-          </ListItem>
+          <Link to="/deckbuilder">
+            <ListItem button key="deckbuilder">
+              <ListItemIcon><BuildOutlinedIcon /></ListItemIcon>
+              <ListItemText primary="DeckBuilder" />
+            </ListItem>
+          </Link>
+
+          {this.state.isAdmin ? 
+          <Link to="/admin">
+            <ListItem button key="admin">
+              <ListItemIcon><DashboardOutlinedIcon /></ListItemIcon>
+              <ListItemText primary="Admin Panel" />
+            </ListItem>
+          </Link>: undefined}
+
 
         </List>
       </div>
     );
 
     return (
-    
+
       <div className={classes.root}>
         <AppBar position="static" className={classes.AppBar}>
           <Toolbar>
@@ -254,7 +280,7 @@ class Nav extends React.Component {
               Tavern Games
             </Typography>
             {this.state.isLoggedin ? <Avatar aria-owns={this.state.anchorEl ? 'simple-menu' : undefined}
-          aria-haspopup="true" onClick={this.handleUserMenuClick} alt="Remy Sharp" src={this.state.userImage} className={classes.bigAvatar} /> : <Button color="inherit" onClick={this.handleClickOpen}>Login / Sign Up</Button>}
+              aria-haspopup="true" onClick={this.handleUserMenuClick} alt="Remy Sharp" src={this.state.userImage} className={classes.bigAvatar} /> : <Button color="primary" onClick={this.handleClickOpen}>Login / Sign Up</Button>}
             <Menu
               id="simple-menu"
               anchorEl={this.state.anchorEl}

@@ -13,6 +13,7 @@ import NotFound from './components/App/NotFound';
 
 import Home from './components/Home/Home';
 import DeckBuilder from './components/DeckBuilder/DeckBuilder';
+import Admin from './components/Admin/Admin';
 
 import './styles/styles.scss';
 
@@ -26,13 +27,6 @@ const theme = createMuiTheme({
     },
     type: 'dark',
   }
-  // overrides: {
-  //   MuiSnackbar: { // Name of the component ⚛️ / style sheet
-  //     bodyStyle: { // Name of the rule
-  //       background: 'black',
-  //       color: 'black' // Some CSS
-  //     }
-  // },
 });
 
 render((
@@ -42,6 +36,7 @@ render((
       <Switch>
         <Route exact path="/" component={Home}/>
         <Route exact path="/deckbuilder" component={DeckBuilder} />
+        <Route exact path="/admin" component={Admin} />
         <Route component={NotFound}/>
       </Switch>
     </App>
