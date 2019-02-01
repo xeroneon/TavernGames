@@ -30,3 +30,15 @@ a {
 #deck:hover {
     cursor: pointer;
 }
+
+@keyframes autofill {
+    to {
+        color: #FFF;
+        background: transparent;
+    }
+}
+
+input:-webkit-autofill {
+    animation-name: autofill;
+    animation-fill-mode: both;
+}
