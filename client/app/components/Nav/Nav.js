@@ -379,7 +379,7 @@ class Nav extends React.Component {
               <Button variant="outlined" onClick={this.handleSignUpToggle} color="primary">
                 {this.state.signup ? "Login" : "Sign Up"}
               </Button>
-              <Button variant="outlined" onClick={this.handleSubmit} color="primary" type="submit">
+              <Button variant="contained" onClick={this.handleSubmit} color="primary" type="submit">
                 Submit
             </Button>
             </DialogActions>

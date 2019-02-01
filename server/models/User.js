@@ -34,7 +34,8 @@ const UserSchema = new mongoose.Schema({
   photo: {
     type: String,
     default: '/assets/img/placeholder-user.png'
-  }
+  },
+  decks: [{ type: Schema.Types.ObjectId, ref: 'Deck' }]
 });
 
 
