@@ -1,32 +1,37 @@
 import React, { Component } from 'react';
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  Switch
+} from 'react-router-dom'
+
 import Footer from '../Footer/Footer';
-import Nav from '../Nav/Nav'
+import Nav from '../Nav/Nav';
+import NotFound from '../App/NotFound';
+import Modal from "../Modal/Modal";
+import Snackbar from "../Snackbar/Snackbar"
 
-import { createMuiTheme } from '@material-ui/core/styles';
-createMuiTheme({
-  palette: {
-    primary: {
-      light: '#757ce8',
-      main: '#3f50b5',
-      dark: '#002884',
-      contrastText: '#fff',
-    },
-    secondary: {
-      light: '#ff7961',
-      main: '#f44336',
-      dark: '#ba000d',
-      contrastText: '#000',
-    },
-  },
-});
+import Home from '../Home/Home';
+import DeckBuilder from '../DeckBuilder/DeckBuilder';
+import Admin from '../Admin/Admin';
 
-const App = ({ children }) => (
+
+
+
+const App = (props) => (
   <>
-  <Nav />
+    <Nav />
     <main>
-      {children}
+      <Switch>
+        <Route exact path="/" component={Home} user="something" />
+        <Route exact path="/deckbuilder" component={DeckBuilder} />
+        <Route exact path="/admin" component={Admin} />
+        <Route component={NotFound} />
+      </Switch>
+      <Modal />
+      <Snackbar />
     </main>
-
     <Footer />
   </>
 );

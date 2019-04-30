@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useContext, useEffect, useState} from 'react';
+import { ModalContext, UserContext, SnackbarContext } from "../../globalState";
+import SideList from "./SideList"
+
 import { Link } from "react-router-dom";
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import SideNav from "../SideNav/SideNav"
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -11,23 +13,6 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Drawer from '@material-ui/core/Drawer';
-import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import BuildOutlinedIcon from '@material-ui/icons/BuildOutlined';
-import HomeOutlinedIcon from '@material-ui/icons/HomeOutlined';
-import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined';
-import TextField from '@material-ui/core/TextField';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Snackbar from '@material-ui/core/Snackbar';
-import CloseIcon from '@material-ui/icons/Close';
 import Avatar from '@material-ui/core/Avatar';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -52,367 +37,107 @@ const styles = {
   }
 };
 
-class Nav extends React.Component {
+const Nav = props => {
+  const { classes } = props;
 
-  constructor(props) {
-    super(props)
-  }
+  const {username, userImage, setUserImage, loggedIn, setLoggedIn, admin, setAdmin } = useContext(UserContext);
+  const {snackbar, setSnackbar, snackbarMessage, setSnackbarMessage } = useContext(SnackbarContext);
+  const {open, setOpen} = useContext(ModalContext);
 
-  state = {
-    isLoggedin: false,
-    isAdmin: false,
-    userImage: '',
-    drawer: false,
-    open: false,
-    isSnackbarOpen: false,
-    snackbarMessage: '',
-    anchorEl: null,
-    signup: false,
-    email: '',
-    username: '',
-    password: '',
-    firstName: '',
-    lastName: ''
-  }
+  const [drawer, setDrawer ] = useState(false);
+  const [anchorEl, setAnchorEl ] = useState(null);
 
-  componentDidMount = () => {
+  useEffect(() => {
     axios.get("/api/users/authenticate")
       .then(res => {
         console.log(res)
-        if(res.data.user.role > 1) {
-          this.setState({
-            isAdmin: true
-          })
-        }
 
         if (res.data.authenticated) {
-          this.setState({
-            isLoggedin: true,
-            userImage: res.data.user.photo
-          })
+          res.data.user.role > 1 ? setAdmin(true) : setAdmin(false);
+          setLoggedIn(true);
+          setUserImage(res.data.user.photo);
         } else {
-          this.setState({
-            isLoggedin: false
-          })
+          setLoggedIn(false)
         }
       })
-  }
+  },[])
 
-  handleInputChange = event => {
-    const { name, value } = event.target;
-    this.setState({
-      [name]: value
-    });
-  };
-
-  toggleDrawer = () => {
-    if (this.state.drawer === false) {
-      this.setState({
-        drawer: true
-      });
+  const toggleDrawer = () => {
+    if (!drawer) {
+      setDrawer(true)
     }
     else {
-      this.setState({
-        drawer: false
-      })
+      setDrawer(false)
     }
   }
 
-  handleClickOpen = () => {
-    this.setState({ open: true });
+  const openModal = () => {
+    setOpen(true)
   };
 
-  handleClose = () => {
-    this.setState({ open: false });
+  const userMenuOpen = event => {
+    // this.setState({ anchorEl: event.currentTarget });
+    console.log(event)
+    setAnchorEl(event.currentTarget)
   };
 
-  handleSignUpToggle = () => {
-    if (this.state.signup === true) {
-      this.setState({
-        signup: false
-      })
-    } else {
-      this.setState({
-        signup: true
-      })
-    }
-  }
-
-  handleSnackbarClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    this.setState({ isSnackbarOpen: false });
+  const userMenuClose = () => {
+    // this.setState({ anchorEl: null });
+    setAnchorEl(null);
   };
 
-  handleUserMenuClick = event => {
-    this.setState({ anchorEl: event.currentTarget });
-  };
 
-  handleUserMenuClose = () => {
-    this.setState({ anchorEl: null });
-  };
 
-  handleSubmit = (event) => {
-    event.preventDefault();
-    if (this.state.signup === true) {
-
-      const newUser = {
-        email: this.state.email,
-        username: this.state.username,
-        password: this.state.password,
-        firstName: this.state.firstName,
-        lastName: this.state.lastName
-      }
-      axios.post("/api/users/signup", newUser)
-        .then(res => {
-          console.log("signed up")
-          if (res.data.success) {
-            this.setState({
-              isLoggedin: true,
-              open: false,
-              isSnackbarOpen: true,
-              snackbarMessage: res.data.message,
-              email: '',
-              username: '',
-              password: '',
-              firstName: '',
-              lastName: ''
-            })
-          } else {
-
-          }
-        })
-        .catch(err => console.log(err));
-    } else {
-      console.log("login");
-
-      const returningUser = {
-        email: this.state.email,
-        username: this.state.username,
-        password: this.state.password,
-      }
-      axios.post("/api/users/login", returningUser)
-        .then(res => {
-          console.log("logged in")
-          if (res.data.success) {
-            this.setState({
-              isLoggedin: true,
-              userImage: res.data.user.photo,
-              open: false,
-              isSnackbarOpen: true,
-              snackbarMessage: res.data.message,
-              email: '',
-              username: '',
-              password: '',
-              firstName: '',
-              lastName: ''
-            })
-          } else {
-            this.setState({
-              isSnackbarOpen: true,
-              snackbarMessage: res.data.message
-            })
-          }
-        })
-        .catch(err => console.log(err));
-
-    }
-  }
-
-  handleLogout = () => {
+  const logout = () => {
     axios.get("/api/users/logout")
       .then(res => {
         if (res.data.loggedOut) {
-          this.setState({
-            isLoggedin: false,
-            isSnackbarOpen: true,
-            snackbarMessage: "Successful Logout"
-          })
-          this.handleUserMenuClose();
+          setLoggedIn(false);
+          setSnackbar(true);
+          setSnackbarMessage("Successful Logout")
+          userMenuClose();
         }
       })
   }
-
-  render() {
-    const { classes } = this.props;
-
-    const sideList = (
-      <div className={classes.list}>
-        <List>
-          <Link to="/">
-            <ListItem button key="home">
-              <ListItemIcon><HomeOutlinedIcon /></ListItemIcon>
-              <ListItemText primary="Home" />
-            </ListItem>
-          </Link>
-
-          <Link to="/deckbuilder">
-            <ListItem button key="deckbuilder">
-              <ListItemIcon><BuildOutlinedIcon /></ListItemIcon>
-              <ListItemText primary="DeckBuilder" />
-            </ListItem>
-          </Link>
-
-          {this.state.isAdmin ? 
-          <Link to="/admin">
-            <ListItem button key="admin">
-              <ListItemIcon><DashboardOutlinedIcon /></ListItemIcon>
-              <ListItemText primary="Admin Panel" />
-            </ListItem>
-          </Link>: undefined}
-
-
-        </List>
-      </div>
-    );
-
+    
     return (
 
       <div className={classes.root}>
         <AppBar position="static" className={classes.AppBar}>
           <Toolbar>
-            <IconButton className={classes.menuButton} color="inherit" aria-label="Menu" onClick={this.toggleDrawer}>
+            <IconButton className={classes.menuButton} color="inherit" aria-label="Menu" onClick={e => toggleDrawer()}>
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" color="inherit" className={classes.grow}>
               Tavern Games
             </Typography>
-            {this.state.isLoggedin ? <Avatar aria-owns={this.state.anchorEl ? 'simple-menu' : undefined}
-              aria-haspopup="true" onClick={this.handleUserMenuClick} alt="Remy Sharp" src={this.state.userImage} className={classes.bigAvatar} /> : <Button color="primary" onClick={this.handleClickOpen}>Login / Sign Up</Button>}
+            {loggedIn ? <Avatar aria-owns={anchorEl ? 'simple-menu' : undefined}
+              aria-haspopup="true" onClick={e => userMenuOpen(e)} alt="Remy Sharp" src={userImage} className={classes.bigAvatar} /> : <Button color="primary" onClick={openModal}>Login / Sign Up</Button>}
             <Menu
               id="simple-menu"
-              anchorEl={this.state.anchorEl}
-              open={Boolean(this.state.anchorEl)}
-              onClose={this.handleUserMenuClose}
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={e => userMenuClose(e)}
             >
-              <MenuItem onClick={this.handleUserMenuClose}>Profile</MenuItem>
-              <MenuItem onClick={this.handleUserMenuClose}>My account</MenuItem>
-              <MenuItem onClick={this.handleLogout}>Logout</MenuItem>
+              <MenuItem onClick={e => userMenuClose(e)}>Profile</MenuItem>
+              <MenuItem onClick={e => userMenuClose(e)}>My account</MenuItem>
+              <MenuItem onClick={e => logout()}>Logout</MenuItem>
             </Menu>
-            {/* <Button color="inherit" onClick={this.handleClickOpen}>Login</Button> */}
           </Toolbar>
         </AppBar>
-        {/* <SideNav open={this.state.drawer} /> */}
-        <Drawer open={this.state.drawer} onClose={this.toggleDrawer}>
+        <Drawer open={drawer} onClose={e => toggleDrawer()}>
           <div
             tabIndex={0}
             role="button"
-            onClick={this.toggleDrawer}
-            onKeyDown={this.toggleDrawer}
+            onClick={e => toggleDrawer()}
+            onKeyDown={e => toggleDrawer()}
           >
-            {sideList}
+            {<SideList list={classes.list} admin={admin} />}
           </div>
         </Drawer>
-
-        <Dialog
-          open={this.state.open}
-          onClose={this.handleClose}
-          scroll="body"
-          aria-labelledby="form-dialog-title"
-        >
-          <DialogTitle id="form-dialog-title">{this.state.signup ? "Sign Up" : "Login"}</DialogTitle>
-          <form>
-            <DialogContent>
-              {this.state.signup ? <TextField
-                autoFocus
-                margin="dense"
-                id="username"
-                label="Username"
-                type="username"
-                name="username"
-                fullWidth
-                variant="outlined"
-                onChange={this.handleInputChange}
-                value={this.state.username}
-              /> : <div></div>}
-              <TextField
-                autoFocus
-                margin="dense"
-                id="email"
-                label={this.state.signup ? "Email Address" : "Username / Email Address"}
-                type="email"
-                name="email"
-                fullWidth
-                variant="outlined"
-                onChange={this.handleInputChange}
-                value={this.state.email}
-              />
-              <TextField
-                margin="dense"
-                id="password"
-                label="Password"
-                type="password"
-                name="password"
-                fullWidth
-                variant="outlined"
-                onChange={this.handleInputChange}
-                value={this.state.password}
-              />
-
-              {this.state.signup ? <TextField
-                margin="dense"
-                id="firstName"
-                label="First Name"
-                type="firstName"
-                name="firstName"
-                fullWidth
-                variant="outlined"
-                onChange={this.handleInputChange}
-                value={this.state.firstName}
-              /> : <div></div>}
-
-              {this.state.signup ? <TextField
-                margin="dense"
-                id="lastName"
-                label="Last Name"
-                type="lastName"
-                name="lastName"
-                fullWidth
-                variant="outlined"
-                onChange={this.handleInputChange}
-                value={this.state.lastName}
-              /> : <div></div>}
-            </DialogContent>
-            <DialogActions>
-              <Button variant="outlined" onClick={this.handleSignUpToggle} color="primary">
-                {this.state.signup ? "Login" : "Sign Up"}
-              </Button>
-              <Button variant="contained" onClick={this.handleSubmit} color="primary" type="submit">
-                Submit
-            </Button>
-            </DialogActions>
-          </form>
-        </Dialog>
-        <Snackbar
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left',
-          }}
-          open={this.state.isSnackbarOpen}
-          autoHideDuration={6000}
-          onClose={this.handleSnackbarClose}
-          ContentProps={{
-            'aria-describedby': 'message-id',
-          }}
-          message={<span id="message-id">{this.state.snackbarMessage}</span>}
-          action={[
-            <IconButton
-              key="close"
-              aria-label="Close"
-              color="primary"
-              className={classes.close}
-              onClick={this.handleSnackbarClose}
-            >
-              <CloseIcon />
-            </IconButton>,
-          ]}
-        />
       </div>
     );
   }
-}
 
 Nav.propTypes = {
   classes: PropTypes.object.isRequired,

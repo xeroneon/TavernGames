@@ -1,5 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
+import { ContextProvider } from "./globalState/state"
 
 import {
   BrowserRouter as Router,
@@ -32,14 +33,16 @@ const theme = createMuiTheme({
 render((
   <Router>
     <MuiThemeProvider theme={theme}>
-    <App>
-      <Switch>
-        <Route exact path="/" component={Home}/>
-        <Route exact path="/deckbuilder" component={DeckBuilder} />
-        <Route exact path="/admin" component={Admin} />
-        <Route component={NotFound}/>
-      </Switch>
-    </App>
+      <ContextProvider>
+        <App>
+          <Switch>
+            <Route exact path="/" component={Home} />
+            <Route exact path="/deckbuilder" component={DeckBuilder} />
+            <Route exact path="/admin" component={Admin} />
+            <Route component={NotFound} />
+          </Switch>
+        </App>
+      </ContextProvider>
     </MuiThemeProvider>
   </Router>
 ), document.getElementById('app'));
