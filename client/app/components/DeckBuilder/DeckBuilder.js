@@ -1,18 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Redirect } from "react-router";
+import NewDeck from "./NewDeck";
+import AllDecks from "./AllDecks";
+import NewDeckDialog from "./NewDeckDialog";
+
 import axios from 'axios';
-import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import AddCircleOutlinedIcon from '@material-ui/icons/AddCircleOutlined';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import TextField from '@material-ui/core/TextField';
 
 const styles = {
     root: {
@@ -23,63 +18,54 @@ const styles = {
     },
 }
 
-class DeckBuilder extends React.Component {
-    constructor(props) {
-        super(props)
+const DeckBuilder = props => {
+
+
+
+    const [open, setOpen ] = useState(false);
+    const [title, setTitle ] = useState('');
+    const [ decks, setDecks ] = useState([]);
+    const [ redirect, setRedirect ] = useState(false);
+    const [ redirectUrl, setRedirectUrl ] = useState('')
+
+    useEffect(() => {
+        getDecks()
+    },[])
+
+    const handleDialog = () => {
+        setOpen(true)
     }
 
-    state = {
-        title: '',
-        open: false
-    }
-
-    componentDidMount() {
-        this.getDecks();
-    }
-
-    handleInputChange = event => {
-        const { name, value } = event.target;
-        this.setState({
-            [name]: value
-        });
+    const handleClose = () => {
+        setOpen(false)
     };
 
-    handleDialog = () => {
-        this.setState({
-            open: true
-        })
-    }
-
-    handleClose = () => {
-        this.setState({ open: false });
-    };
-
-    createDeck = event => {
+    const createDeck = event => {
         event.preventDefault();
         const body = {
-            title: this.state.title
+            title
         }
         axios.post("/api/deck/create", body)
             .then(res => {
                 if (res.data.success) {
-                    this.getDecks();
-                    this.handleClose();
+                    getDecks();
+                    handleClose();
+                    setRedirectUrl(`/deckview/${res.data.id}`);
+                    setRedirect(true);
                 }
             })
     }
 
-    getDecks = () => {
+    const getDecks = () => {
         axios.post("/api/deck/all")
             .then(res => {
-                this.setState({
-                    decks: res.data.decks
-                })
+                setDecks(res.data.decks);
             })
     }
 
-    render() {
         return (
             <div style={{ flexGrow: 1 }}>
+                {redirect ? <Redirect to={redirectUrl} /> : null }
                 <Grid container spacing={16}>
                     <Grid item xs={12}>
                         <Typography variant="h3" gutterBottom style={{ padding: "20px" }}>
@@ -87,76 +73,21 @@ class DeckBuilder extends React.Component {
                         </Typography>
                     </Grid>
                 </Grid>
-                <Grid container justify="flex-start" spacing={8} style={{ padding: "20px" }}>
+                <Grid container justify="flex-start" spacing={40} style={{ padding: "20px" }}>
                     <Grid item xs={12}>
                         <Typography variant="h5" gutterBottom>
                             All Decks
                         </Typography>
-
                     </Grid>
 
-                    <Grid item xs={6} md={2}>
-                        <Paper
-                            onClick={this.handleDialog}
-                            id="newDeck"
-                            style={
-                                {
-                                    backgroundColor: "#494949",
-                                    borderRadius: "15px",
-                                    height: "250px",
-                                    width: "179px",
-                                    lineHeight: "250px",
-                                    textAlign: "center",
-                                    fontSize: "70px",
-                                    color: "#FFF"
-                                }
-                            }>
-                            <AddCircleOutlinedIcon color="primary" style={{ fontSize: "50px" }} />
-                        </Paper>
-                    </Grid>
+                    <NewDeck handleDialog={handleDialog} />
 
-                    {this.state.decks ? this.state.decks.map(deck => {
-                        return <Grid item xs={6} md={2} key={deck._id} style={{textAlign: "center"}}>
-                            <img id="deck" src="/assets/img/mtg-card-back.png" style={{ borderRadius: "15px", height: "250px" }} />
-                            <Typography variant="subtitle1" gutterBottom>
-                                {deck.title}
-                            </Typography>
-                        </Grid>
-                    }) : undefined}
+                    <AllDecks decks={decks} />
 
                 </Grid>
-                <Dialog
-                    open={this.state.open}
-                    onClose={this.handleClose}
-                    scroll="body"
-                    aria-labelledby="form-dialog-title"
-                >
-                    <DialogTitle id="form-dialog-title">Deck Name</DialogTitle>
-                    <form>
-                        <DialogContent>
-                            <TextField
-                                autoFocus
-                                margin="dense"
-                                id="title"
-                                label="Deck Name"
-                                type="title"
-                                name="title"
-                                fullWidth
-                                variant="outlined"
-                                onChange={this.handleInputChange}
-                                value={this.state.title}
-                            />
-                        </DialogContent>
-                        <DialogActions>
-                            <Button variant="contained" onClick={this.createDeck} color="primary" type="submit">
-                                Submit
-                            </Button>
-                        </DialogActions>
-                    </form>
-                </Dialog>
+                <NewDeckDialog open={open} handleClose={handleClose} setTitle={setTitle} title={title} createDeck={createDeck} />
             </div>
         )
-    }
 }
 
 export default withStyles(styles)(DeckBuilder);

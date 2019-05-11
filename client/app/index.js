@@ -27,7 +27,10 @@ const theme = createMuiTheme({
       contrastText: '#fff'
     },
     type: 'dark',
-  }
+  },
+  typography: {
+    useNextVariants: true,
+  },
 });
 
 render((

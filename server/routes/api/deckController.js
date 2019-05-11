@@ -19,7 +19,8 @@ module.exports = (app) => {
                 })
 
                 res.send({
-                    success: true
+                    success: true,
+                    id: newDeck._id
                 })
             })
     })
