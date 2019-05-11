@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from "axios";
 import SearchCards from "./SearchCards"
+import DeckList from "./DeckList"
+
 
 import { withStyles } from '@material-ui/core/styles';
 import { fade } from '@material-ui/core/styles/colorManipulator';
@@ -117,7 +119,10 @@ const DeckView = props => {
                 </Grid>
             </Grid>
             <Grid container spacing={40}>
-                {searchCards[0] ? <SearchCards cards={searchCards} /> : null}
+                {searchCards[0] ? <SearchCards deckId={id} cards={searchCards} /> : null}
+            </Grid>
+            <Grid container >
+                <DeckList deckId={id} />
             </Grid>
         </>
     )

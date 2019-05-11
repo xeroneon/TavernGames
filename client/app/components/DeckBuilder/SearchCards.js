@@ -7,6 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import InputBase from '@material-ui/core/InputBase';
 import SearchIcon from '@material-ui/icons/Search';
+import LibraryAdd from '@material-ui/icons/LibraryAdd';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Zoom from '@material-ui/core/Zoom';
@@ -25,7 +26,8 @@ import TablePagination from '@material-ui/core/TablePagination';
 
 const styles = theme => ({
     root: {
-        flexGrow: 1,
+        width: "100%",
+        overflowX: "auto"
     },
     grow: {
         flexGrow: 1,
@@ -60,6 +62,20 @@ const SearchCards = props => {
             setAnchorEl(e.currentTarget);
             setPopperOpen(true);
         }
+    }
+
+    const addCard = (cardId) => {
+console.log(props.deckId)
+        const body = {
+            cardId: cardId,
+            deckId: props.deckId
+        }
+
+        axios.post("/api/deck/addcard", body)
+            .then(res => {
+                console.log(res.message)
+            })
+
     }
 
     const replaceMana = (mana) => {
@@ -143,7 +159,7 @@ const SearchCards = props => {
             <Grid container justify="center">
                 <Zoom in={true}>
                     <Grid item xs={10}>
-                        <Paper>
+                        <Paper className={classes.root}>
 
                             <Table>
                                 <TableHead>
@@ -153,18 +169,20 @@ const SearchCards = props => {
                                         <TableCell>Name</TableCell>
                                         <TableCell>Type</TableCell>
                                         <TableCell>Card Text</TableCell>
+                                        <TableCell></TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {props.cards
                                     .slice(page * 5, page * 5 + 5).map(card => {
                                         return (
-                                            <TableRow className={classes.row} key={card._id}>
+                                            <TableRow className={classes.row} key={card.id}>
                                                 <TableCell><img src={card.imageUrl} width="60px" onMouseOver={e => handleImagePopper(e)} onMouseLeave={e => handleImagePopper(e)}/></TableCell>
                                                 <TableCell>{replaceMana(card.manaCost)}</TableCell>
                                                 <TableCell><Typography variant="h6">{card.name}</Typography></TableCell>
                                                 <TableCell>{card.type}</TableCell>
                                                 <TableCell>{card.text}</TableCell>
+                                                <TableCell><Button color="primary" onClick={e => addCard(card.id)}><LibraryAdd color="primary"/></Button></TableCell>
                                             </TableRow>
                                         )
                                     })}

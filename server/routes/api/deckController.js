@@ -41,4 +41,31 @@ module.exports = (app) => {
             })
     })
 
+    app.post("/api/deck/addcard", (req,res,next) => {
+        User.findOne({_id: req.user._id})
+            .exec((err, user) => {
+                Deck.findOne({_id: req.body.deckId})
+                    .exec((err, deck) => {
+                        console.log(deck, req.deckId)
+                        deck.cards.push(req.body.cardId)
+
+                        deck.save(err => {
+                            if (err) {
+                                res.send({
+                                    success: false,
+                                    message: "Problem saving deck, Try again"
+                                })
+                            }
+
+                            else {
+                                res.send({
+                                    success: true,
+                                    message: "Card added"
+                                })
+                            }
+                        })
+                    })
+            })
+    })
+
 }

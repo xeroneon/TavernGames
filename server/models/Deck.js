@@ -14,7 +14,7 @@ const DeckSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  cards: [{ type: Schema.Types.ObjectId, ref: 'Card' }],
+  cards: [],
   isDeleted: {
     type: String,
     default: ''
