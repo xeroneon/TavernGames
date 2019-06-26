@@ -108,13 +108,11 @@ const DeckList = props => {
             </Paper>}
 
             <Popper open={popperOpen} anchorEl={anchorEl} transition placement="left">
-                    {/* {({ TransitionProps }) => ( */}
                     <Zoom in={popperOpen}>
                         <Paper>
                             <img src={popperImg} />
                         </Paper>
                     </Zoom>
-                    {/* )} */}
                 </Popper>
         </>
     )

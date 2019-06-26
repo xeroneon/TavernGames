@@ -14,7 +14,7 @@
     "start:dev": "node server"
   },
   "engines": {
-    "node": ">=6"
+    "node": "10.15.3"
   },
   "dependencies": {
     "@babel/core": "^7.0.0-beta.42",
@@ -39,7 +39,7 @@
     "mongoose": "^5.4.6",
     "mtgsdk": "^0.4.2",
     "node-sass": "^4.7.2",
-    "nodemon": "^1.17.2",
+    "nodemon": "^1.19.1",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "postcss-loader": "^2.1.3",
