@@ -3,6 +3,9 @@ import axios from "axios";
 import SearchCards from "./SearchCards"
 import DeckList from "./DeckList"
 
+import LinearProgress from '@material-ui/core/LinearProgress';
+
+
 
 import { withStyles } from '@material-ui/core/styles';
 import { fade } from '@material-ui/core/styles/colorManipulator';
@@ -121,8 +124,13 @@ const DeckView = props => {
             <Grid container spacing={40}>
                 {searchCards[0] ? <SearchCards deckId={id} cards={searchCards} /> : null}
             </Grid>
-            <Grid container >
+            <br/>
+            <br/>
+            <br/>
+            <Grid container justify="center">
+                {/* <CircularProgress color="primary"/> */}
                 <DeckList deckId={id} />
+
             </Grid>
         </>
     )

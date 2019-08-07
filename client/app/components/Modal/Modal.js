@@ -85,7 +85,7 @@ const Modal = props => {
     
         }
       }
-
+ 
     return (
         <Dialog
           open={open}

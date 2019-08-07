@@ -15,6 +15,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Zoom from '@material-ui/core/Zoom';
 import Paper from '@material-ui/core/Paper'
 import Popper from '@material-ui/core/Popper';
+import LinearProgress from '@material-ui/core/LinearProgress';
+
 
 
 import Table from '@material-ui/core/Table';
@@ -79,16 +81,17 @@ const DeckList = props => {
 
     return (
         <>
-            {!isLoading && <Paper className={classes.root}>
+        <Grid item xs={8} alignContent="center">
+            {!isLoading ? <Paper className={classes.root}>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Card Image</TableCell>
-                            <TableCell>Mana Cost</TableCell>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Type</TableCell>
-                            <TableCell>Card Text</TableCell>
-                            <TableCell></TableCell>
+                            <TableCell align="left">Card Image</TableCell>
+                            <TableCell align="left">Mana Cost</TableCell>
+                            <TableCell align="left">Name</TableCell>
+                            <TableCell align="left">Type</TableCell>
+                            {/* <TableCell align="left">Card Text</TableCell> */}
+                            {/* <TableCell align="left"></TableCell> */}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -97,23 +100,25 @@ const DeckList = props => {
                                 <TableCell component="th" scope="row">
                                     <img src={card.imageUrl} width="60px" onMouseOver={e => handleImagePopper(e)} onMouseLeave={e => handleImagePopper(e)} />
                                 </TableCell>
-                                <TableCell align="right"><ReplaceMana mana={card.manaCost} manaClass={classes.mana} /></TableCell>
-                                <TableCell align="right">{card.name}</TableCell>
-                                <TableCell align="right">{card.type}</TableCell>
-                                <TableCell align="right">{card.text}</TableCell>
+                                <TableCell ><ReplaceMana mana={card.manaCost} manaClass={classes.mana} /></TableCell>
+                                <TableCell align="left">{card.name}</TableCell>
+                                <TableCell align="left">{card.type}</TableCell>
+                                {/* <TableCell align="left">{card.text}</TableCell> */}
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
-            </Paper>}
+            </Paper> : <LinearProgress color="primary" />}
+            {/* <LinearProgress width="100%" color="primary" /> */}
 
             <Popper open={popperOpen} anchorEl={anchorEl} transition placement="left">
-                    <Zoom in={popperOpen}>
-                        <Paper>
-                            <img src={popperImg} />
-                        </Paper>
-                    </Zoom>
-                </Popper>
+                <Zoom in={popperOpen}>
+                    <Paper>
+                        <img src={popperImg} />
+                    </Paper>
+                </Zoom>
+            </Popper>
+            </Grid>
         </>
     )
 }

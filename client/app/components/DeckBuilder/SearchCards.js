@@ -40,7 +40,7 @@ const styles = theme => ({
     },
     mana: {
         width: "15px",
-        display: "block",
+        display: "inline",
         marginBottom: "5px"
     }
 })
@@ -173,7 +173,7 @@ const SearchCards = props => {
                                         <TableCell>Mana Cost</TableCell>
                                         <TableCell>Name</TableCell>
                                         <TableCell>Type</TableCell>
-                                        <TableCell>Card Text</TableCell>
+                                        {/* <TableCell>Card Text</TableCell> */}
                                         <TableCell></TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -186,7 +186,7 @@ const SearchCards = props => {
                                                     <TableCell><ReplaceMana mana={card.manaCost} manaClass={classes.mana} /></TableCell>
                                                     <TableCell><Typography variant="h6">{card.name}</Typography></TableCell>
                                                     <TableCell>{card.type}</TableCell>
-                                                    <TableCell>{card.text}</TableCell>
+                                                    {/* <TableCell>{card.text}</TableCell> */}
                                                     <TableCell><Button color="primary" onClick={e => addCard(card.id)}><LibraryAdd color="primary" /></Button></TableCell>
                                                 </TableRow>
                                             )

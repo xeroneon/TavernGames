@@ -20,7 +20,7 @@ const AllDecks = props => {
             {decks ? decks.map(deck => {
                 return <Grid item xs={6} md={2} key={deck._id} style={{ textAlign: "center" }}>
                     <Link to={`/deckview/${deck._id}`}>
-                        <img id="deck" src="/assets/img/mtg-card-back.png" style={{ borderRadius: "15px", height: "250px" }} />
+                        <img id="deck" src="/assets/img/card-back.png" style={{ borderRadius: "15px", height: "250px" }} />
                     </Link>
                     <Typography variant="h6" gutterBottom>
                         {deck.title}

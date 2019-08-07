@@ -16,14 +16,19 @@ const styles = {
     grow: {
         flexGrow: 1,
     },
+    container: {
+        backgroundColor: "#333 !important",
+        width: "100%",
+        borderRadius: "20px"
+    }
 }
 
 const DeckBuilder = props => {
 
+    const { classes } = props;
 
-
-    const [open, setOpen ] = useState(false);
-    const [title, setTitle ] = useState('');
+    const [ open, setOpen ] = useState(false);
+    const [ title, setTitle ] = useState('');
     const [ decks, setDecks ] = useState([]);
     const [ redirect, setRedirect ] = useState(false);
     const [ redirectUrl, setRedirectUrl ] = useState('')
@@ -68,12 +73,13 @@ const DeckBuilder = props => {
                 {redirect ? <Redirect to={redirectUrl} /> : null }
                 <Grid container spacing={16}>
                     <Grid item xs={12}>
-                        <Typography variant="h3" gutterBottom style={{ padding: "20px" }}>
+                        <Typography variant="h3" gutterBottom style={{ padding: "10px" }}>
                             Magic: The Gathering
                         </Typography>
                     </Grid>
                 </Grid>
-                <Grid container justify="flex-start" spacing={40} style={{ padding: "20px" }}>
+                    <div className={classes.container}>
+                <Grid container justify="flex-start" spacing={40} style={{ padding: "20px"}}>
                     <Grid item xs={12}>
                         <Typography variant="h5" gutterBottom>
                             All Decks
@@ -83,8 +89,8 @@ const DeckBuilder = props => {
                     <NewDeck handleDialog={handleDialog} />
 
                     <AllDecks decks={decks} />
-
                 </Grid>
+                    </div>
                 <NewDeckDialog open={open} handleClose={handleClose} setTitle={setTitle} title={title} createDeck={createDeck} />
             </div>
         )
