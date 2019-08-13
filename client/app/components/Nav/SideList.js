@@ -10,8 +10,6 @@ import HomeOutlinedIcon from '@material-ui/icons/HomeOutlined';
 import DashboardOutlinedIcon from '@material-ui/icons/DashboardOutlined';
 
 const SideList = props => {
-
-
     return (
         <div className={props.list}>
         <List>
@@ -21,21 +19,21 @@ const SideList = props => {
               <ListItemText primary="Home" />
             </ListItem>
           </Link>
-
+          {props.loggedIn &&
           <Link to="/deckbuilder">
             <ListItem button key="deckbuilder">
               <ListItemIcon><BuildOutlinedIcon /></ListItemIcon>
               <ListItemText primary="DeckBuilder" />
             </ListItem>
-          </Link>
+          </Link>}
 
-          {props.admin ? 
+          {props.admin && 
           <Link to="/admin">
             <ListItem button key="admin">
               <ListItemIcon><DashboardOutlinedIcon /></ListItemIcon>
               <ListItemText primary="Admin Panel" />
             </ListItem>
-          </Link>: undefined}
+          </Link>}
 
 
         </List>

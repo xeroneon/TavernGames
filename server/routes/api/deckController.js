@@ -6,103 +6,85 @@ const mtg = require('mtgsdk');
 
 
 module.exports = (app) => {
-    app.post("/api/deck/create", (req, res, next) => {
+    app.post("/api/deck/create", async (req, res, next) => {
 
-        User.findOne({ _id: req.user._id })
-            .exec((err, user) => {
-                const newDeck = new Deck();
-                newDeck.title = req.body.title;
-                newDeck.user = user._id
-                newDeck.save();
+        const user = await User.findOne({ _id: req.user._id });
+        const newDeck = new Deck();
+        newDeck.title = req.body.title;
+        newDeck.user = user._id
+        newDeck.save();
 
-                user.decks.push(newDeck._id)
-                user.save(err => {
-                    if (err) return console.log(err);
-                })
+        user.decks.push(newDeck._id)
+        user.save(err => {
+            if (err) return console.log(err);
+        })
 
-                res.send({
-                    success: true,
-                    id: newDeck._id
-                })
-            })
+        res.send({
+            success: true,
+            id: newDeck._id
+        })
     })
 
-    app.post("/api/deck/all", (req, res, next) => {
-        User.findOne({ _id: req.user._id })
-            .populate('decks')
-            .exec((err, user) => {
-                if (user.decks) {
-                    res.send({
-                        decks: user.decks
-                    })
-                } else {
-                    res.send({
-                        decks: []
-                    })
-                }
+    app.post("/api/deck/all", async (req, res, next) => {
+        // User.findOne({ _id: req.user._id })
+        //     .populate('decks')
+        //     .exec((err, user) => {
+        //         if (user.decks) {
+        //             res.send({
+        //                 decks: user.decks
+        //             })
+        //         } else {
+        //             res.send({
+        //                 decks: []
+        //             })
+        //         }
+        //     })
+
+        try {
+            const user = await User.findOne({ _id: req.user._id }).populate('decks');
+
+            res.send({
+                decks: user.decks ? user.decks : []
             })
+        } catch (e) {
+            console.log(e)
+        }
     })
 
-    app.get("/api/deck/:id", (req, res, next) => {
+    app.get("/api/deck/:id", async (req, res, next) => {
         const id = req.params.id;
-        
-        Deck.findOne({ _id: id })
-        .exec((err, deck) => {
-            
-            const testPromise = new Promise((resolve, reject) => {
-                let cardList = [];
-                let count = 0;
-                    for (let i = 0; i < deck.cards.length; i++) {
-                        mtg.card.where({ id: deck.cards[i] })
-                        .then(card => {
-                            cardList.push(card[0])
-                            count++
-                            console.log(card)
-                            if (count === deck.cards.length) {
-                                resolve({
-                                    deck: deck,
-                                    cardList: cardList
-                                })
-                            }
-                        })
-
-                    }
-                }).then(value => {
-                    res.send({
-                        success: true,
-                        deck: value.deck,
-                        cardList: value.cardList
-                    })
-                })
-
+        try {
+            const deck = await Deck.findOne({ _id: id });
+            console.time()
+            const cardList = await Promise.all(deck.cards.map(card => {
+                return mtg.card.where({ id: card });
+            }))
+            console.timeEnd();
+            res.send({
+                cardList
             })
+        }
+
+        catch (e) {
+            console.log(e)
+        }
     })
 
-    app.post("/api/deck/addcard", (req, res, next) => {
-        User.findOne({ _id: req.user._id })
-            .exec((err, user) => {
-                Deck.findOne({ _id: req.body.deckId })
-                    .exec((err, deck) => {
-                        console.log(deck, req.deckId)
-                        deck.cards.push(req.body.cardId)
-
-                        deck.save(err => {
-                            if (err) {
-                                res.send({
-                                    success: false,
-                                    message: "Problem saving deck, Try again"
-                                })
-                            }
-
-                            else {
-                                res.send({
-                                    success: true,
-                                    message: "Card added"
-                                })
-                            }
-                        })
-                    })
+    app.post("/api/deck/addcard", async (req, res, next) => {
+        try {
+            const user = await User.findOne({ _id: req.user._id });
+            const deck = await Deck.findOne({ _id: req.body.deckId });
+            deck.cards.push(req.body.cardId);
+            deck.save(err => {
+                res.send({
+                    success: err ? false : true,
+                    message: err ? "Problem saving deck, Try again" : "Card added"
+                })
             })
+        }
+        catch (e) {
+            console.log(e)
+        }
     })
 
 }

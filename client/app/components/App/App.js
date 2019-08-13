@@ -1,8 +1,6 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
-  BrowserRouter as Router,
   Route,
-  Link,
   Switch
 } from 'react-router-dom'
 
@@ -16,7 +14,7 @@ import Home from '../Home/Home';
 import DeckBuilder from '../DeckBuilder/DeckBuilder';
 import DeckView from '../DeckBuilder/DeckView';
 import Admin from '../Admin/Admin';
-
+import SignUp from '../SignUp/SignUp';
 
 
 
@@ -29,6 +27,8 @@ const App = (props) => (
         <Route exact path="/deckbuilder" component={DeckBuilder} />
         <Route path="/deckview/:id" component={DeckView} />
         <Route exact path="/admin" component={Admin} />
+        <Route exact path="/signup" component={SignUp} />
+
         <Route component={NotFound} />
       </Switch>
       <Modal />

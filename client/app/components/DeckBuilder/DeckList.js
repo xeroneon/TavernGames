@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
+//-----hooks//
+import useDecks from '../../hooks/useDecks';
+//-------------
 import axios from "axios";
 import SearchCards from "./SearchCards";
 import ReplaceMana from './ReplaceMana';
@@ -47,21 +50,23 @@ const styles = theme => ({
 const DeckList = props => {
     const { classes } = props;
 
-    const [cards, setCards] = useState();
-    const [isLoading, setIsLoading] = useState(true);
+    // const [cards, setCards] = useState();
+    // const [isLoading, setIsLoading] = useState(true);
     const [anchorEl, setAnchorEl] = useState(null);
     const [popperOpen, setPopperOpen] = useState(false);
     const [popperImg, setPopperImg] = useState('');
 
-    useEffect(() => {
-        axios.get(`/api/deck/${props.deckId}`)
-            .then(res => {
-                const { cardList, deck, success } = res.data
-                console.log(res.data)
-                setCards(cardList);
-                setIsLoading(false);
-            })
-    }, [])
+    // useEffect(() => {
+    //     axios.get(`/api/deck/${props.deckId}`)
+    //         .then(res => {
+    //             const { cardList, deck, success } = res.data
+    //             console.log(res.data)
+    //             setCards(cardList);
+    //             setIsLoading(false);
+    //         })
+    // }, [])
+
+    const {cards, isLoading } = useDecks(props.deckId);
 
     const handleImagePopper = e => {
 
@@ -81,7 +86,7 @@ const DeckList = props => {
 
     return (
         <>
-        <Grid item xs={8} alignContent="center">
+        <Grid item xs={8}>
             {!isLoading ? <Paper className={classes.root}>
                 <Table>
                     <TableHead>
@@ -96,13 +101,13 @@ const DeckList = props => {
                     </TableHead>
                     <TableBody>
                         {cards.map(card => (
-                            <TableRow key={card.name}>
+                            <TableRow key={card[0].name}>
                                 <TableCell component="th" scope="row">
-                                    <img src={card.imageUrl} width="60px" onMouseOver={e => handleImagePopper(e)} onMouseLeave={e => handleImagePopper(e)} />
+                                    <img src={card[0].imageUrl} width="60px" onMouseOver={e => handleImagePopper(e)} onMouseLeave={e => handleImagePopper(e)} />
                                 </TableCell>
-                                <TableCell ><ReplaceMana mana={card.manaCost} manaClass={classes.mana} /></TableCell>
-                                <TableCell align="left">{card.name}</TableCell>
-                                <TableCell align="left">{card.type}</TableCell>
+                                <TableCell ><ReplaceMana mana={card[0].manaCost} manaClass={classes.mana} /></TableCell>
+                                <TableCell align="left">{card[0].name}</TableCell>
+                                <TableCell align="left">{card[0].type}</TableCell>
                                 {/* <TableCell align="left">{card.text}</TableCell> */}
                             </TableRow>
                         ))}

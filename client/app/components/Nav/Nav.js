@@ -1,6 +1,9 @@
 import React, { useContext, useEffect, useState} from 'react';
-import { ModalContext, UserContext, SnackbarContext } from "../../globalState";
-import SideList from "./SideList"
+import { ModalContext, SnackbarContext } from "../../globalState";
+import SideList from "./SideList";
+
+//----hooks//
+import useUser from "../../hooks/useUser";
 
 import { Link } from "react-router-dom";
 import axios from 'axios';
@@ -39,28 +42,12 @@ const styles = {
 
 const Nav = props => {
   const { classes } = props;
-
-  const {username, userImage, setUserImage, loggedIn, setLoggedIn, admin, setAdmin } = useContext(UserContext);
-  const {snackbar, setSnackbar, snackbarMessage, setSnackbarMessage } = useContext(SnackbarContext);
-  const {open, setOpen} = useContext(ModalContext);
+  const { open, setOpen } = useContext(ModalContext);
 
   const [drawer, setDrawer ] = useState(false);
   const [anchorEl, setAnchorEl ] = useState(null);
 
-  useEffect(() => {
-    axios.get("/api/users/authenticate")
-      .then(res => {
-        console.log(res)
-
-        if (res.data.authenticated) {
-          res.data.user.role > 1 ? setAdmin(true) : setAdmin(false);
-          setLoggedIn(true);
-          setUserImage(res.data.user.photo);
-        } else {
-          setLoggedIn(false)
-        }
-      })
-  },[])
+  const { userImage, loggedIn, admin, setLoggedIn, logout } = useUser();
 
   const toggleDrawer = () => {
     if (!drawer) {
@@ -76,29 +63,12 @@ const Nav = props => {
   };
 
   const userMenuOpen = event => {
-    // this.setState({ anchorEl: event.currentTarget });
-    console.log(event)
     setAnchorEl(event.currentTarget)
   };
 
   const userMenuClose = () => {
-    // this.setState({ anchorEl: null });
     setAnchorEl(null);
   };
-
-
-
-  const logout = () => {
-    axios.get("/api/users/logout")
-      .then(res => {
-        if (res.data.loggedOut) {
-          setLoggedIn(false);
-          setSnackbar(true);
-          setSnackbarMessage("Successful Logout")
-          userMenuClose();
-        }
-      })
-  }
     
     return (
 
@@ -112,7 +82,7 @@ const Nav = props => {
               Tavern Games
             </Typography>
             {loggedIn ? <Avatar aria-owns={anchorEl ? 'simple-menu' : undefined}
-              aria-haspopup="true" onClick={e => userMenuOpen(e)} alt="Remy Sharp" src={userImage} className={classes.bigAvatar} /> : <Button color="primary" onClick={openModal}>Login / Sign Up</Button>}
+              aria-haspopup="true" onClick={e => userMenuOpen(e)} alt="Remy Sharp" src={userImage} className={classes.bigAvatar} /> : <Button color="primary" onClick={openModal}>Login</Button>}
             <Menu
               id="simple-menu"
               anchorEl={anchorEl}
@@ -121,7 +91,7 @@ const Nav = props => {
             >
               <MenuItem onClick={e => userMenuClose(e)}>Profile</MenuItem>
               <MenuItem onClick={e => userMenuClose(e)}>My account</MenuItem>
-              <MenuItem onClick={e => logout()}>Logout</MenuItem>
+              <MenuItem onClick={e => {logout(); userMenuClose()}}>Logout</MenuItem>
             </Menu>
           </Toolbar>
         </AppBar>
@@ -132,7 +102,7 @@ const Nav = props => {
             onClick={e => toggleDrawer()}
             onKeyDown={e => toggleDrawer()}
           >
-            {<SideList list={classes.list} admin={admin} />}
+            {<SideList list={classes.list} admin={admin} loggedIn={loggedIn} />}
           </div>
         </Drawer>
       </div>

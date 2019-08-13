@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+//-----hooks//
+import useDecks from '../../hooks/useDecks';
+//-------------
 import { Redirect } from "react-router";
 import NewDeck from "./NewDeck";
 import AllDecks from "./AllDecks";
@@ -19,7 +22,7 @@ const styles = {
     container: {
         backgroundColor: "#333 !important",
         width: "100%",
-        borderRadius: "20px"
+        borderRadius: "10px"
     }
 }
 
@@ -29,13 +32,10 @@ const DeckBuilder = props => {
 
     const [ open, setOpen ] = useState(false);
     const [ title, setTitle ] = useState('');
-    const [ decks, setDecks ] = useState([]);
     const [ redirect, setRedirect ] = useState(false);
     const [ redirectUrl, setRedirectUrl ] = useState('')
 
-    useEffect(() => {
-        getDecks()
-    },[])
+    const { decks } = useDecks();
 
     const handleDialog = () => {
         setOpen(true)
@@ -47,10 +47,7 @@ const DeckBuilder = props => {
 
     const createDeck = event => {
         event.preventDefault();
-        const body = {
-            title
-        }
-        axios.post("/api/deck/create", body)
+        axios.post("/api/deck/create", {title})
             .then(res => {
                 if (res.data.success) {
                     getDecks();
@@ -61,19 +58,12 @@ const DeckBuilder = props => {
             })
     }
 
-    const getDecks = () => {
-        axios.post("/api/deck/all")
-            .then(res => {
-                setDecks(res.data.decks);
-            })
-    }
-
         return (
             <div style={{ flexGrow: 1 }}>
                 {redirect ? <Redirect to={redirectUrl} /> : null }
                 <Grid container spacing={16}>
                     <Grid item xs={12}>
-                        <Typography variant="h3" gutterBottom style={{ padding: "10px" }}>
+                        <Typography variant="h3" gutterBottom style={{ padding: "50px" }}>
                             Magic: The Gathering
                         </Typography>
                     </Grid>

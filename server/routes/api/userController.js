@@ -4,7 +4,7 @@ const LocalStrategy = require("passport-local")
 
 module.exports = (app) => {
 
-    app.post("/api/users/signup", (req, res, next) => {
+    app.post("/api/users/signup", async (req, res, next) => {
         const {
             username,
             firstName,
@@ -12,7 +12,7 @@ module.exports = (app) => {
             password
         } = req.body
 
-        let { email } = req.body;
+        let email = req.body.email.toLowerCase();
 
         if (!username) {
             return res.send({
@@ -45,37 +45,27 @@ module.exports = (app) => {
             });
         }
 
-        User.find({
-            email: email.toLowerCase()
-        }, (err, previousUsers) => {
-            if (err) {
-                return res.send({
-                    success: false,
-                    message: "Error finding user"
-                })
-            } else if (previousUsers.length > 0) {
+        try {
+            const checkEmail = await User.find({ email });
+            const checkUsername = await User.find({ username });
+            if (checkEmail.length > 0) {
                 return res.send({
                     success: false,
                     message: "Email is already in use"
                 })
             }
-        })
-
-        User.find({
-            username: username
-        }, (err, previousUsers) => {
-            if (err) {
+            if (checkUsername.length > 0) {
                 return res.send({
                     success: false,
-                    message: "Error finding user"
-                })
-            } else if (previousUsers.length > 0) {
-                return res.send({
-                    success: false,
-                    message: "Username is already taken"
+                    message: "Email is already in use"
                 })
             }
-        })
+        } catch (e) {
+            return res.send({
+                success: false,
+                message: "Error finding user"
+            })
+        }
 
         const newUser = new User();
 
@@ -84,25 +74,24 @@ module.exports = (app) => {
         newUser.firstName = firstName;
         newUser.lastName = lastName;
         newUser.password = newUser.generateHash(password);
-
-        newUser.save((err, user) => {
-            if (err) {
+        
+        try {
+            const user = await newUser.save();
+            req.login(user, function (err) {
                 return res.send({
-                    success: false,
-                    message: "failed to save user"
+                    success: true,
+                    message: "User Signed Up"
                 })
-            } else {
-                req.login(user, function(err) {
-                    return res.send({
-                        success: true,
-                        message: "User Signed Up"
-                    })
-                })
-            }
-        })
+            })
+        } catch (e) {
+            return res.send({
+                success: false,
+                message: "failed to save user"
+            })
+        }
     })
 
-    app.post("/api/users/login", (req, res, next) => {
+    app.post("/api/users/login", async (req, res, next) => {
         const {
             username,
             password
@@ -110,50 +99,32 @@ module.exports = (app) => {
 
         const email = req.body.email.toLowerCase();
 
-        User.findOne({$or: [
-            {email: email},
-            {username: username}
-        ]}).exec(function(err, user){
-            if(err) {
-                return res.send({
-                    success: false,
-                    message: "Something went wrong logging in, Try again"
-                })
-            }
-            if (user) {
-                //continue passport video
-                req.login(user, function(err) {
-                    return res.send({
-                        success: true,
-                        message: "Successful Login",
-                        user: req.user
-                    })
-                })
-            } //user already exists with email AND/OR username.
-            else {
-                return res.send({
-                    success: false,
-                    message: "No user found"
-                })
-            } //no users with that email NOR username exist.
-        });
+        const user = await User.findOne({
+            $or: [
+                { email: email },
+                { username: username }
+            ]
+        })
+
+        user ? req.login(user, function (err) {
+            res.send({
+                success: true,
+                message: "Successful Login",
+                user: req.user
+            })
+        }) : res.send({
+            success: false,
+            message: err ? "Something went wrong logging in, Try again" : "No user found"
+        })
 
 
     })
 
-    app.get("/api/users/authenticate", (req,res, next) => {
-        console.log(req.user)
-
-        if (req.user) {
-            return res.send({
-                authenticated: true,
-                user: req.user
-            })
-        } else {
-            return res.send({
-                authenticated: false
-            })
-        }
+    app.get("/api/users/authenticate", (req, res, next) => {
+        res.send({
+            authenticated: req.user ? true : false,
+            user: req.user ? req.user : null
+        })
     })
 
     app.get("/api/users/logout", (req, res, next) => {
@@ -165,26 +136,28 @@ module.exports = (app) => {
     })
 
     passport.use(new LocalStrategy(
-        function(email, username, password, done) {
-          User.findOne({$or: [
-            {email: email},
-            {username: username}
-        ]}, function (err, user) {
-            if (err) { return done(err); }
-            if (!user) { return done(null, false); }
-            if (!user.validPassword(password)) { return done(null, false); }
-            return done(null, user);
-          });
+        function (email, username, password, done) {
+            User.findOne({
+                $or: [
+                    { email: email },
+                    { username: username }
+                ]
+            }, function (err, user) {
+                if (err) { return done(err); }
+                if (!user) { return done(null, false); }
+                if (!user.validPassword(password)) { return done(null, false); }
+                return done(null, user);
+            });
         }
-      ));
+    ));
 
-    passport.serializeUser(function(user, done) {
+    passport.serializeUser(function (user, done) {
         done(null, user.id);
-      });
-       
-      passport.deserializeUser(function(id, done) {
+    });
+
+    passport.deserializeUser(function (id, done) {
         User.findById(id, function (err, user) {
-          done(err, user);
+            done(err, user);
         });
-      });
+    });
 }
