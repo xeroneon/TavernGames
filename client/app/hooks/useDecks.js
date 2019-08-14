@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const useDecks = (deckId) => {
     const [decks, setDecks] = useState([]);
-    const [cards, setCards] = useState();
+    const [cards, setCards] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -28,7 +28,7 @@ const useDecks = (deckId) => {
         return () => {
             current = false;
         }
-    }, [decks, cards])
+    }, [])
 
     return { decks, setDecks, cards, setCards, isLoading, setIsLoading };
 }

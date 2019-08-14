@@ -86,6 +86,7 @@ const DeckList = props => {
 
     return (
         <>
+        {console.log(cards)}
         <Grid item xs={8}>
             {!isLoading ? <Paper className={classes.root}>
                 <Table>
@@ -101,13 +102,13 @@ const DeckList = props => {
                     </TableHead>
                     <TableBody>
                         {cards.map(card => (
-                            <TableRow key={card[0].name}>
+                            <TableRow key={card.name}>
                                 <TableCell component="th" scope="row">
-                                    <img src={card[0].imageUrl} width="60px" onMouseOver={e => handleImagePopper(e)} onMouseLeave={e => handleImagePopper(e)} />
+                                    <img src={card.imageUrl} width="60px" onMouseOver={e => handleImagePopper(e)} onMouseLeave={e => handleImagePopper(e)} />
                                 </TableCell>
-                                <TableCell ><ReplaceMana mana={card[0].manaCost} manaClass={classes.mana} /></TableCell>
-                                <TableCell align="left">{card[0].name}</TableCell>
-                                <TableCell align="left">{card[0].type}</TableCell>
+                                <TableCell ><ReplaceMana mana={card.manaCost} manaClass={classes.mana} /></TableCell>
+                                <TableCell align="left">{card.name}</TableCell>
+                                <TableCell align="left">{card.type}</TableCell>
                                 {/* <TableCell align="left">{card.text}</TableCell> */}
                             </TableRow>
                         ))}

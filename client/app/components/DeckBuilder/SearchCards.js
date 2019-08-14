@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { SnackbarContext } from "../../globalState"
 import axios from "axios";
 import { withStyles } from '@material-ui/core/styles';
 import { fade } from '@material-ui/core/styles/colorManipulator';
@@ -15,6 +16,11 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Zoom from '@material-ui/core/Zoom';
 import Paper from '@material-ui/core/Paper'
 import Popper from '@material-ui/core/Popper';
+
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 
 import Table from '@material-ui/core/Table';
@@ -46,16 +52,23 @@ const styles = theme => ({
 })
 
 const SearchCards = props => {
-    const { classes } = props
+    const { classes } = props;
+    const { snackbar, setSnackbar, snackbarMessage, setSnackbarMessage } = useContext(SnackbarContext);
     const [page, setPage] = useState(0);
     const [count, setCount] = useState(props.cards.length);
     const [anchorEl, setAnchorEl] = useState(null);
     const [popperOpen, setPopperOpen] = useState(false);
     const [popperImg, setPopperImg] = useState('');
+    const [ open, setOpen ] = useState(false);
+    const [ loading, setLoading ] = useState(false);
+
+    useEffect(() => {
+        if (props.cards) {
+            setOpen(true)
+        }
+    }, [props.cards])
 
     const handleImagePopper = e => {
-
-        // popperOpen ? setPopperOpen(false) : setPopperOpen(true);
         if (popperOpen) {
             setPopperOpen(false);
             setAnchorEl(null);
@@ -69,6 +82,7 @@ const SearchCards = props => {
 
     const addCard = (cardId) => {
         console.log(props.deckId)
+        setLoading(true)
         const body = {
             cardId: cardId,
             deckId: props.deckId
@@ -76,7 +90,12 @@ const SearchCards = props => {
 
         axios.post("/api/deck/addcard", body)
             .then(res => {
-                console.log(res.message)
+                if (res.data.success) {
+                    setLoading(false);
+                    setOpen(false);
+                    setSnackbar(true);
+                    setSnackbarMessage(res.data.message);
+                }
             })
 
     }
@@ -153,6 +172,10 @@ const SearchCards = props => {
         })
     }
 
+    const handleClose = () => {
+        if(open) {setOpen(false)}
+    }
+
 
     return (
         <>
@@ -162,56 +185,69 @@ const SearchCards = props => {
                 </Grid>
             })} */}
             <Grid container justify="center">
-                <Zoom in={true}>
-                    <Grid item xs={10}>
-                        <Paper className={classes.root}>
+                {/* <Zoom in={true}> */}
+                    <Dialog
+                        open={open}
+                        onClose={handleClose}
+                        scroll="body"
+                        aria-labelledby="form-dialog-title"
+                        maxWidth="xl"
+                    >
+                    <DialogTitle>Search</DialogTitle>
+                    <DialogContent>
+                            <Paper className={classes.root}>
 
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Card Image</TableCell>
-                                        <TableCell>Mana Cost</TableCell>
-                                        <TableCell>Name</TableCell>
-                                        <TableCell>Type</TableCell>
-                                        {/* <TableCell>Card Text</TableCell> */}
-                                        <TableCell></TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {props.cards
-                                        .slice(page * 5, page * 5 + 5).map(card => {
-                                            return (
-                                                <TableRow className={classes.row} key={card.id}>
-                                                    <TableCell><img src={card.imageUrl} width="60px" onMouseOver={e => handleImagePopper(e)} onMouseLeave={e => handleImagePopper(e)} /></TableCell>
-                                                    <TableCell><ReplaceMana mana={card.manaCost} manaClass={classes.mana} /></TableCell>
-                                                    <TableCell><Typography variant="h6">{card.name}</Typography></TableCell>
-                                                    <TableCell>{card.type}</TableCell>
-                                                    {/* <TableCell>{card.text}</TableCell> */}
-                                                    <TableCell><Button color="primary" onClick={e => addCard(card.id)}><LibraryAdd color="primary" /></Button></TableCell>
-                                                </TableRow>
-                                            )
-                                        })}
-                                </TableBody>
-                            </Table>
-                            <TablePagination
-                                rowsPerPageOptions={[10]}
-                                component="div"
-                                count={count}
-                                rowsPerPage={5}
-                                page={page}
-                                backIconButtonProps={{
-                                    'aria-label': 'Previous Page',
-                                }}
-                                nextIconButtonProps={{
-                                    'aria-label': 'Next Page',
-                                }}
-                                onChangePage={(e, pag) => setPage(pag)}
-                                onChangeRowsPerPage={null}
-                            />
-                        </Paper>
-                    </Grid>
-                </Zoom>
-                <Popper open={popperOpen} anchorEl={anchorEl} transition placement="left">
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Card Image</TableCell>
+                                            <TableCell>Mana Cost</TableCell>
+                                            <TableCell>Name</TableCell>
+                                            <TableCell>Type</TableCell>
+                                            {/* <TableCell>Card Text</TableCell> */}
+                                            <TableCell></TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {props.cards
+                                            .slice(page * 5, page * 5 + 5).map(card => {
+                                                return (
+                                                    <TableRow className={classes.row} key={card.id}>
+                                                        <TableCell><img src={card.imageUrl} width="60px" onMouseOver={e => handleImagePopper(e)} onMouseLeave={e => handleImagePopper(e)} /></TableCell>
+                                                        <TableCell><ReplaceMana mana={card.manaCost} manaClass={classes.mana} /></TableCell>
+                                                        <TableCell><Typography variant="h6">{card.name}</Typography></TableCell>
+                                                        <TableCell>{card.type}</TableCell>
+                                                        {/* <TableCell>{card.text}</TableCell> */}
+                                                <TableCell><Button color="primary" onClick={e => addCard(card.id)}>{loading ? <CircularProgress color="primary" /> : <LibraryAdd color="primary" />}</Button></TableCell>
+                                                    </TableRow>
+                                                )
+                                            })}
+                                    </TableBody>
+                                </Table>
+                                <TablePagination
+                                    rowsPerPageOptions={[10]}
+                                    component="div"
+                                    count={count}
+                                    rowsPerPage={5}
+                                    page={page}
+                                    backIconButtonProps={{
+                                        'aria-label': 'Previous Page',
+                                    }}
+                                    nextIconButtonProps={{
+                                        'aria-label': 'Next Page',
+                                    }}
+                                    onChangePage={(e, pag) => setPage(pag)}
+                                    onChangeRowsPerPage={null}
+                                />
+                            </Paper>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button variant="outlined" color="primary" onClick={() => setOpen(false)}>Close</Button>
+                            </DialogActions>
+                    </Dialog>
+                {/* </Zoom> */}
+            </Grid>
+                <Popper open={popperOpen} anchorEl={anchorEl} transition placement="left" style={{zIndex: "1400"}}>
                     {/* {({ TransitionProps }) => ( */}
                     <Zoom in={popperOpen}>
                         <Paper>
@@ -220,7 +256,6 @@ const SearchCards = props => {
                     </Zoom>
                     {/* )} */}
                 </Popper>
-            </Grid>
 
         </>
     )

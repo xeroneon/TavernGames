@@ -50,7 +50,7 @@ const DeckBuilder = props => {
         axios.post("/api/deck/create", {title})
             .then(res => {
                 if (res.data.success) {
-                    getDecks();
+                    // getDecks();
                     handleClose();
                     setRedirectUrl(`/deckview/${res.data.id}`);
                     setRedirect(true);

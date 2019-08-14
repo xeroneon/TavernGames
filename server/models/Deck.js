@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 const bcrypt = require("bcrypt");
 
 const DeckSchema = new mongoose.Schema({
@@ -14,7 +14,7 @@ const DeckSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  cards: [],
+  cards: [{ type: Schema.Types.ObjectId, ref: 'Card' }],
   isDeleted: {
     type: String,
     default: ''

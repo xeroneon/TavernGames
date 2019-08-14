@@ -13,7 +13,7 @@ const CardSchema = new mongoose.Schema({
   colorIdentity: Array,
   colors: Array,
   foreignNames: Array,
-  sdkId: String,
+  id: String,
   imageUrl: String,
   layout: String,
   legalities: Array,
