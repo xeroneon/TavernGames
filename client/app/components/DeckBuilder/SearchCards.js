@@ -5,6 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { fade } from '@material-ui/core/styles/colorManipulator';
 // import ReplaceMana from '../../../../utils/ReplaceMana'
 import ReplaceMana from './ReplaceMana';
+import useDecks from '../../hooks/useDecks'
 
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
@@ -62,6 +63,8 @@ const SearchCards = props => {
     const [ open, setOpen ] = useState(false);
     const [ loading, setLoading ] = useState(false);
 
+    const { reload, setReload } = useDecks();
+
     useEffect(() => {
         if (props.cards) {
             setOpen(true)
@@ -91,10 +94,13 @@ const SearchCards = props => {
         axios.post("/api/deck/addcard", body)
             .then(res => {
                 if (res.data.success) {
+                    setReload(!reload);
+                    props.reload()
                     setLoading(false);
                     setOpen(false);
                     setSnackbar(true);
                     setSnackbarMessage(res.data.message);
+                    
                 }
             })
 

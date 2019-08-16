@@ -43,11 +43,8 @@ module.exports = (app) => {
     app.get("/api/deck/:id", async (req, res, next) => {
         const id = req.params.id;
         try {
-            const deck = await Deck.findOne({ _id: id }).populate("cards");
             console.time()
-            // const cardList = await Promise.all(deck.cards.map(card => {
-            //     return mtg.card.where({ id: card });
-            // }))
+            const deck = await Deck.findOne({ _id: id }).populate("cards");
             console.timeEnd();
             return res.send({
                 cardList: deck.cards
@@ -83,7 +80,57 @@ module.exports = (app) => {
             })
         }
         catch (e) {
-            console.log(e)
+            res.send({
+                success: false,
+                message: "Something went wrong adding the card, Try again"
+            })
+        }
+    });
+
+    app.post("/api/deck/deletecard", async (req, res, next) => {
+        try {
+            const deck = await Deck.findOne({ _id: req.body.deckId }).populate("cards");
+            console.log(req.body.deckId);
+
+            for (let i = 0; i < deck.cards.length; i++) {
+                let item = deck.cards[i];
+                if(item.id === req.body.cardId) {
+                    deck.cards.splice(i, 1);
+                    const card = await Card.findOne({_id: item._id});
+                    card.decks.splice(card.decks.indexOf(req.body.deckId,1));
+
+                    await card.save();
+                    await deck.save();
+
+                    return res.send({
+                        success: true,
+                        message: "Card Removed"
+                    })
+                }
+            }
+
+            // deck.cards.map(async (item, index) => {
+            //     if(item.id === req.body.cardId) {
+            //         deck.cards.splice(index, 1);
+            //         const card = await Card.findOne({_id: item._id});
+            //         card.decks.splice(card.decks.indexOf(req.body.deckId,1));
+
+            //         await card.save();
+            //         await deck.save();
+
+            //         res.send({
+            //             success: true,
+            //             message: "Card Removed"
+            //         })
+            //     }
+            // })
+
+        } catch (e) {
+            res.send({
+                success: false,
+                message: "Something went wrong deleting the card, Try again",
+                error: e
+            })
         }
     })
 

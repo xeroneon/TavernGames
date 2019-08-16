@@ -34,6 +34,7 @@ const styles = theme => ({
         marginBottom: "50px"
     },
     search: {
+        color: "white",
         position: 'relative',
         borderRadius: theme.shape.borderRadius,
         backgroundColor: fade(theme.palette.common.white, 0.15),
@@ -80,6 +81,7 @@ const DeckView = props => {
     const [ search, setSearch ] = useState('');
     const [ searchCards, setSearchCards ] = useState([]);
     const [ loading, setLoading ] = useState(false);
+    const [reload, setReload ] = useState(false);
 
     const handleSearch = () => {
         setLoading(true);
@@ -92,6 +94,11 @@ const DeckView = props => {
             setLoading(false);
             setSearchCards(res.data.cards)
         })
+    }
+
+    const handleReload= () => {
+        console.log("reload")
+        setReload(!reload);
     }
 
 
@@ -122,14 +129,14 @@ const DeckView = props => {
                 </Grid>
             </Grid>
             <Grid container spacing={40}>
-                {searchCards[0] ? <SearchCards deckId={id} cards={searchCards} /> : null}
+                {searchCards[0] ? <SearchCards deckId={id} cards={searchCards} reload={handleReload}/> : null}
             </Grid>
             <br/>
             <br/>
             <br/>
             <Grid container justify="center">
                 {/* <CircularProgress color="primary"/> */}
-                <DeckList deckId={id} />
+                <DeckList deckId={id} reload={reload}/>
 
             </Grid>
         </>
